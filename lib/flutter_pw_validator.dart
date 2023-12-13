@@ -17,6 +17,7 @@ class FlutterPwValidator extends StatefulWidget {
       lowercaseCharCount,
       numericCharCount,
       specialCharCount;
+  final double spaceBetweenBarAndConditions;
   final Color defaultColor, successColor, failureColor;
   final double width, height;
   final Function onSuccess;
@@ -24,6 +25,10 @@ class FlutterPwValidator extends StatefulWidget {
   final TextEditingController controller;
   final FlutterPwValidatorStrings? strings;
   final Key? key;
+  final Widget title;
+  final bool showSuccessIcon;
+  final bool showFailureIcon;
+  final Widget successIcon, failureIcon;
 
   FlutterPwValidator(
       {required this.width,
@@ -31,6 +36,12 @@ class FlutterPwValidator extends StatefulWidget {
       required this.minLength,
       required this.onSuccess,
       required this.controller,
+      required this.title,
+      this.showSuccessIcon = false,
+      this.showFailureIcon = false,
+      this.successIcon = const Icon(Icons.check, color: Colors.green),
+      this.failureIcon = const Icon(Icons.close, color: Colors.red),
+      this.spaceBetweenBarAndConditions = 10,
       this.uppercaseCharCount = 0,
       this.lowercaseCharCount = 0,
       this.numericCharCount = 0,
@@ -169,55 +180,62 @@ class FlutterPwValidatorState extends State<FlutterPwValidator> {
       height: widget.height,
       child: new Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          new Flexible(
-            flex: 3,
-            child: new Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Iterate through the conditions map values to check if there is any true values then create green ValidationBarComponent.
-                for (bool value in _conditionsHelper.getter()!.values)
-                  if (value == true)
-                    new ValidationBarComponent(color: widget.successColor),
+          new Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Iterate through the conditions map values to check if there is any true values then create green ValidationBarComponent.
+              for (bool value in _conditionsHelper.getter()!.values)
+                if (value == true)
+                  new ValidationBarComponent(color: widget.successColor),
 
-                // Iterate through the conditions map values to check if there is any false values then create red ValidationBarComponent.
-                for (bool value in _conditionsHelper.getter()!.values)
-                  if (value == false)
-                    new ValidationBarComponent(color: widget.defaultColor)
-              ],
-            ),
+              // Iterate through the conditions map values to check if there is any false values then create red ValidationBarComponent.
+              for (bool value in _conditionsHelper.getter()!.values)
+                if (value == false)
+                  new ValidationBarComponent(color: widget.defaultColor)
+            ],
           ),
-          new Flexible(
-            flex: 7,
-            child: new Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          SizedBox(height: widget.spaceBetweenBarAndConditions),
+          widget.title,
+          SizedBox(height: widget.spaceBetweenBarAndConditions),
+          new Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(left: SizeConfig.width! * 0.03),
+              child: new Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
-                //Iterate through the condition map entries and generate new ValidationTextWidget for each item in Green or Red Color
-                children: _conditionsHelper.getter()!.entries.map((entry) {
-                  int? value;
-                  if (entry.key == widget.translatedStrings.atLeast)
-                    value = widget.minLength;
-                  if (entry.key == widget.translatedStrings.normalLetters)
-                    value = widget.normalCharCount;
-                  if (entry.key == widget.translatedStrings.uppercaseLetters)
-                    value = widget.uppercaseCharCount;
-                  if (entry.key == widget.translatedStrings.lowercaseLetters)
-                    value = widget.lowercaseCharCount;
-                  if (entry.key == widget.translatedStrings.numericCharacters)
-                    value = widget.numericCharCount;
-                  if (entry.key == widget.translatedStrings.specialCharacters)
-                    value = widget.specialCharCount;
-                  return new ValidationTextWidget(
-                    color: _isFirstRun
-                        ? widget.defaultColor
-                        : entry.value
-                            ? widget.successColor
-                            : widget.failureColor,
-                    text: entry.key,
-                    value: value,
-                  );
-                }).toList()),
+                  //Iterate through the condition map entries and generate new ValidationTextWidget for each item in Green or Red Color
+                  children: _conditionsHelper.getter()!.entries.map((entry) {
+                    int? value;
+                    if (entry.key == widget.translatedStrings.atLeast)
+                      value = widget.minLength;
+                    if (entry.key == widget.translatedStrings.normalLetters)
+                      value = widget.normalCharCount;
+                    if (entry.key == widget.translatedStrings.uppercaseLetters)
+                      value = widget.uppercaseCharCount;
+                    if (entry.key == widget.translatedStrings.lowercaseLetters)
+                      value = widget.lowercaseCharCount;
+                    if (entry.key == widget.translatedStrings.numericCharacters)
+                      value = widget.numericCharCount;
+                    if (entry.key == widget.translatedStrings.specialCharacters)
+                      value = widget.specialCharCount;
+                    return new ValidationTextWidget(
+                      color: _isFirstRun
+                          ? widget.defaultColor
+                          : entry.value
+                              ? widget.successColor
+                              : widget.failureColor,
+                      text: entry.key,
+                      value: value,
+                      showSuccessIcon: widget.showSuccessIcon,
+                      showFailureIcon: widget.showFailureIcon,
+                      successIcon: widget.successIcon,
+                      failureIcon: widget.failureIcon,
+                    );
+                  }).toList()),
+            ),
           )
         ],
       ),
