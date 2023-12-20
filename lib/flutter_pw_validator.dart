@@ -229,7 +229,11 @@ class FlutterPwValidatorState extends State<FlutterPwValidator> {
                               : widget.failureColor,
                       text: entry.key,
                       value: value,
-                      showSuccessIcon: widget.showSuccessIcon,
+                      showSuccessIcon: _isFirstRun
+                          ? false
+                          : entry.value
+                              ? widget.showSuccessIcon
+                              : false,
                       showFailureIcon: widget.showFailureIcon,
                       successIcon: widget.successIcon,
                       failureIcon: widget.failureIcon,
